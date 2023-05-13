@@ -1,78 +1,50 @@
-import { ethers } from 'ethers';
-import { SismoSDK } from '@sismo/sdk';
+import { ethers } from "ethers";
+import { UniswapV2DataProvider } from "./data-providers/UniswapV2DataProvider";
+import BadgeContractABI from "./BadgeContractABI.json"; // Your Badge contract ABI
+import calculateBadges from "./eligibility-verification/verify-eligibility";
 
-// Initialize the Sismo SDK
-const sismo = new SismoSDK(ethers.provider);
+// Connect to the Ethereum node
+const provider = new ethers.providers.JsonRpcProvider(
+  process.env.ETHEREUM_RPC_URL,
+);
+const signer = provider.getSigner();
 
-// Badge tiers
-const BADGE_TIERS = ['Bronze', 'Silver', 'Gold', 'Platinum'];
+// Initialize the Uniswap data provider
+const uniswapDataProvider = new UniswapV2DataProvider(
+  process.env.UNISWAP_V2_SUBGRAPH_URL,
+);
 
-// Function to create a new Soulbound token (badge)
-async function createBadge(factoryContract, name, symbol, metadata) {
-try {
-const createBadgeTx = await factoryContract.createSoulboundToken(name, symbol, metadata);
-const receipt = await createBadgeTx.wait();
-const badgeCreatedEvent = receipt.events?.find((e) => e.event === 'SoulboundTokenCreated');
-const badgeAddress = badgeCreatedEvent?.args?.soulboundToken;
-console.log(Badge ${name} created at address: ${badgeAddress});
-return badgeAddress;
-} catch (error) {
-console.error(Failed to create badge ${name}: ${error});
-}
-}
+// Initialize the Badge contract
+const badgeContract = new ethers.Contract(
+  process.env.BADGE_CONTRACT_ADDRESS,
+  BadgeContractABI,
+  signer,
+);
 
-// Function to mint a badge
-async function mintBadge(operatorContract, badgeAddress, recipient, tokenId) {
-try {
-const mintBadgeTx = await operatorContract.mint(badgeAddress, recipient, tokenId);
-const receipt = await mintBadgeTx.wait();
-console.log(Minted badge for user ${recipient} with token ID ${tokenId}:, receipt);
-} catch (error) {
-console.error(Failed to mint badge: ${error});
-}
-}
+async function mintBadges(address: string) {
+  try {
+    // Fetch the user data from Uniswap
+    const userData = await uniswapDataProvider.getUserData(address);
 
-// Function to fetch user data
-async function getUserData(address) {
-// Fetch and process the data for a user's Ethereum address
-const userData = await fetchUserData(address);
-console.log('User Data:', userData);
-return userData;
-}
+    // Calculate the badges based on the user data
+    const badges = calculateBadges(userData);
 
-// Function to check the eligibility of a user for a badge, create the badge if not exists, and mint the badge
-async function createBadgeIfEligible(badge, userData, userAddress) {
-const badges = calculateBadges(userData);
-if (badges.includes(badge)) {
-const badgeName = badge.split(' ')[0];  // e.g., 'Bronze Trader'
-const badgeSymbol = badgeName.replace(' ', '_').toUpperCase();  // e.g., 'BRONZE_TRADER'
-const badgeAddress = await createBadge(sismo.factory, badgeName, badgeSymbol, { description: Earned for <span class="math-inline">\{badgeName\.toLowerCase\(\)\}\ });
-// Mint the badge for the user
-const tokenId = BADGE_TIERS.indexOf(badgeName.split(' ')[0]);  // e.g., 0 for 'Bronze', 1 for 'Silver', etc.
-await mintBadge(sismo.operator, badgeAddress, userAddress, tokenId);
-}
-}
-// Fetch and process the data for a user's Ethereum address
-getUserData('0xYourEthereumAddressHere')
-.then(userData => {
-// Trader Badges
-['Bronze Trader', 'Silver Trader', 'Gold Trader', 'Platinum Trader'].forEach(badge => {
-createBadgeIfEligible(`{badge} Badge`, userData, '0xYourEthereumAddressHere');
-});
-// Active Trader Badges
-['Bronze Active Trader', 'Silver Active Trader', 'Gold Active Trader'].forEach(badge => {
-  createBadgeIfEligible(`${badge} Badge`, userData, '0xYourEthereumAddressHere');
-// Provider Badges
-    ['Bronze Provider', 'Silver Provider', 'Gold Provider', 'Platinum Provider'].forEach(badge => {
-      createBadgeIfEligible(`${badge} Badge`, userData, '0xYourEthereumAddressHere');
-    });
+    // For each badge, call the mintBadge method on the Badge contract
+    for (const badge of badges) {
+      const tx = await badgeContract.mintBadge(address, badge);
+      const receipt = await tx.wait();
 
-    // First Trade Badge
-    if (userData.firstTradeTimestamp) {
-      createBadgeIfEligible('First Trade Badge', userData, '0xYourEthereumAddressHere');
+      // Log the transaction receipt
+      console.log(
+        `Badge ${badge} minted with transaction hash: ${receipt.transactionHash}`,
+      );
     }
-
-    // Remember that for now, Early Liquidity Provider and Diversified Provider badges are ignored.
-  })
-  .catch(error => console.error('Error fetching data:', error));
+  } catch (error) {
+    console.error(`Failed to mint badges for address ${address}: ${error}`);
+  }
 }
+
+// Mint badges for a given Ethereum address
+mintBadges("0xYourEthereumAddressHere")
+  .then(() => console.log("Badge minting completed"))
+  .catch((error) => console.error("Badge minting failed:", error));

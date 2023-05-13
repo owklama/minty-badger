@@ -1,5 +1,5 @@
 import { GraphQLProvider } from "group-generators/helpers/data-providers";
-import uniswapV2Schema from "./uniswapv2/interface-schema.json";
+import uniswapV2Schema from "./interface-schema.json";
 
 export class UniswapV2DataProvider {
   private graphQLProvider: GraphQLProvider;
