@@ -1,0 +1,48 @@
+{
+  "name": "UniswapV2",
+  "endpoints": [
+    {
+      "name": "getSwaps",
+      "description": "Fetches swaps data for a given Ethereum address",
+      "parameters": [
+        {
+          "name": "address",
+          "type": "string",
+          "description": "The Ethereum address of the account"
+        },
+        {
+          "name": "skip",
+          "type": "number",
+          "description": "The number of entries to skip"
+        }
+      ]
+    },
+    {
+      "name": "getLiquidityPositions",
+      "description": "Fetches liquidity positions data for a given Ethereum address",
+      "parameters": [
+        {
+          "name": "address",
+          "type": "string",
+          "description": "The Ethereum address of the account"
+        },
+        {
+          "name": "skip",
+          "type": "number",
+          "description": "The number of entries to skip"
+        }
+      ]
+    },
+    {
+      "name": "getUserData",
+      "description": "Fetches user data including swaps and liquidity positions for a given Ethereum address",
+      "parameters": [
+        {
+          "name": "address",
+          "type": "string",
+          "description": "The Ethereum address of the account"
+        }
+      ]
+    }
+  ]
+}
