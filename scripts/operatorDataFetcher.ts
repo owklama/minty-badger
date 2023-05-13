@@ -1,8 +1,10 @@
 import { ethers } from "ethers";
-import { SismoSDK } from "@sismo/sdk";
 
-// Initialize the Sismo SDK
-const sismo = new SismoSDK(ethers.provider);
+// Define the Ethereum provider
+const provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
+
+// Define the signer
+const signer = provider.getSigner();
 
 // Assuming the data groups are already created and we have their addresses
 const uniswapSwapsDataGroupAddress = "0xYourUniswapSwapsDataGroupAddress";
@@ -13,12 +15,12 @@ const uniswapLiquidityPositionsDataGroupAddress =
 const uniswapSwapsOperator = new ethers.Contract(
   uniswapSwapsDataGroupAddress,
   OperatorABI,
-  ethers.provider.getSigner(),
+  signer,
 );
 const uniswapLiquidityPositionsOperator = new ethers.Contract(
   uniswapLiquidityPositionsDataGroupAddress,
   OperatorABI,
-  ethers.provider.getSigner(),
+  signer,
 );
 
 // Function to fetch data from a data group
@@ -37,7 +39,7 @@ async function fetchData(operator, startTime, endTime) {
 }
 
 // Fetch the data
-const swapsData = fetchDta(
+const swapsData = fetchData(
   uniswapSwapsOperator,
   0,
   Math.floor(Date.now() / 1000),
