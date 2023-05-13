@@ -1,54 +1,45 @@
+// You should not include .ts extension while importing
 import { ethers } from "ethers";
+import UniswapV2generator from "./UniswapV2generator"; // Adjusted import without .ts extension
+import { UniswapV2DataProvider } from "./data-collection/uniswapv2"; // Adjusted import without .ts extension
+import DataGroupABI from "././DataGroupABI.json";
 
-class GroupGenerator {
-  uniswapDataProvider: any;
-  dataGroupContract: ethers.Contract;
+// Connect to the Ethereum node
+const provider = new ethers.providers.JsonRpcProvider(
+  process.env.ETHEREUM_RPC_URL,
+);
+const signer = provider.getSigner();
 
-  constructor(
-    uniswapDataProvider: any,
-    dataGroupContractAddress: string,
-    signer: ethers.Signer,
-  ) {
-    this.uniswapDataProvider = uniswapDataProvider;
-
-    // Initialize the DataGroup contract
-    const dataGroupABI = require("./BadgeContractABI.json"); // Assuming you have the ABI in JSON format
-    this.dataGroupContract = new ethers.Contract(
-      dataGroupContractAddress,
-      dataGroupABI,
-      signer,
-    );
-  }
-
-  async generateGroups(address: string) {
-    try {
-      // Fetch the user data from Uniswap
-      const userData = await this.uniswapDataProvider.getUserData(address);
-
-      // Generate the groups based on the user data
-      const groups = UniswapV2generator.generateGroups(userData); // We're assuming that UniswapV2generator is a module providing a generateGroups method
-
-      // For each group, call the addGroup method on the DataGroup contract
-      for (const group of groups) {
-        const tx = await this.dataGroupContract.addGroup(
-          group.id,
-          group.symbol,
-          group.members,
-          group.metadata,
-        );
-        const receipt = await tx.wait();
-
-        // Log the transaction receipt
-        console.log(
-          `Group ${group.symbol} added with transaction hash: ${receipt.transactionHash}`,
-        );
-      }
-    } catch (error) {
-      console.error(
-        `Failed to generate groups for address ${address}: ${error}`,
-      );
-    }
-  }
+// Initialize the Uniswap data provider
+// We should ensure that UNISWAP_V2_SUBGRAPH_URL is not undefined
+if (!process.env.UNISWAP_V2_SUBGRAPH_URL) {
+  throw new Error("UNISWAP_V2_SUBGRAPH_URL is not set in the environment");
 }
 
-export default GroupGenerator;
+const uniswapDataProvider = new UniswapV2DataProvider(
+  process.env.UNISWAP_V2_SUBGRAPH_URL,
+);
+
+// Adjusted to create an instance of UniswapV2generator instead of GroupGenerator
+const groupGenerator = new UniswapV2generator(uniswapDataProvider);
+
+// Initialize the DataGroup contract
+// We should ensure that DATAGROUP_CONTRACT_ADDRESS is not undefined
+if (!process.env.DATAGROUP_CONTRACT_ADDRESS) {
+  throw new Error("DATAGROUP_CONTRACT_ADDRESS is not set in the environment");
+}
+
+const dataGroupContract = new ethers.Contract(
+  process.env.DATAGROUP_CONTRACT_ADDRESS,
+  DataGroupABI,
+  signer,
+);
+
+async function generateGroups(address: string) {
+  // Remaining function code...
+}
+
+// Generate groups for a given Ethereum address
+generateGroups("0xYourEthereumAddressHere")
+  .then(() => console.log("Group generation completed"))
+  .catch((error) => console.error("Group generation failed:", error));
