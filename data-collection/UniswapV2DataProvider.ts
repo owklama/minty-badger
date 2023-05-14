@@ -1,5 +1,5 @@
 import GraphQLProvider from "../helpers/data-providers/GraphQLProvider";
-
+import uniswapV2Schema from "./interface-schema.json";
 export default class UniswapV2DataProvider {
   private gql: GraphQLProvider;
 
@@ -52,18 +52,24 @@ export default class UniswapV2DataProvider {
 
     while (true) {
       const swapData = await this.getSwaps(address, skip);
+      swaps = swaps.concat(swapData);
+      if (swapData.length < 1000) {
+        break;
+      }
+      skip += 1000;
+    }
+
+    skip = 0; // reset skip for fetching liquidity positions
+
+    while (true) {
       const liquidityPositionData = await this.getLiquidityPositions(
         address,
         skip,
       );
-
-      swaps = swaps.concat(swapData);
       liquidityPositions = liquidityPositions.concat(liquidityPositionData);
-
-      if (swapData.length < 1000 && liquidityPositionData.length < 1000) {
+      if (liquidityPositionData.length < 1000) {
         break;
       }
-
       skip += 1000;
     }
 
