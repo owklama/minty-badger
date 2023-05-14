@@ -1,6 +1,6 @@
 import GraphQLProvider from "./GraphQLProvider";
 
-export default class UniswapV2DataProvider {
+export default class UniswapV2UserDataProvider {
   private gql: GraphQLProvider;
 
   constructor(endpoint: string) {
