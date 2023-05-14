@@ -1,7 +1,13 @@
+import UniswapV2DataProvider from "../data-collection/UniswapV2DataProvider";
+
 // Badge criteria constants
 const VOLUME_TIERS = [1000, 10000, 100000, 1000000];
 const TRADE_TIERS = [10, 100, 1000];
 const LIQUIDITY_TIERS = [1000, 10000, 100000, 1000000];
+
+const dataProvider = new UniswapV2DataProvider(
+  "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2",
+);
 
 // Helper functions to calculate specific badges
 function calculateVolumeBadge(volume) {
@@ -46,7 +52,7 @@ function calculateLiquidityBadge(liquidity) {
   return null;
 }
 
-export function function calculateBadges(userData) {
+export function calculateBadges(userData) {
   const badges = [];
 
   // First Trade Badge
@@ -77,15 +83,14 @@ export function function calculateBadges(userData) {
   return badges;
 }
 
-const verifyEligibility = async (address: string) => {
+export const verifyEligibility = async (address: string) => {
   // Fetch and process the data for a user's Ethereum address
-  fetchUserData("0x1234...")
+  dataProvider
+    .getUserData("0xYourEthereumAddressHere")
     .then((userData) => {
       console.log("User Data:", userData);
       const badges = calculateBadges(userData);
       console.log("User Badges:", badges);
     })
     .catch((error) => console.error("Error fetching data:", error));
-  const badges = calculateBadges(userData);
-  return badges;
 };

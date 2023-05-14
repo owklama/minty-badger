@@ -1,8 +1,8 @@
 // You should not include .ts extension while importing
 import { ethers } from "ethers";
 import UniswapV2generator from "./UniswapV2generator"; // Adjusted import without .ts extension
-import { UniswapV2DataProvider } from "./data-collection/uniswapv2"; // Adjusted import without .ts extension
-import DataGroupABI from "././DataGroupABI.json";
+import { UniswapV2DataProvider } from "../../data-collection/UniswapV2DataProvider"; // Adjusted import without .ts extension
+import DataGroupABI from "./";
 
 // Connect to the Ethereum node
 const provider = new ethers.providers.JsonRpcProvider(

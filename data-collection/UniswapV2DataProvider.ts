@@ -1,37 +1,47 @@
-import { GraphQLProvider } from "./helpers/data-providers/GraphQLProvider.ts";
-import uniswapV2Schema from "./interface-schema.json";
+import GraphQLProvider from "../helpers/data-providers/GraphQLProvider";
 
-export class UniswapV2DataProvider {
-  private graphQLProvider: GraphQLProvider;
+export default class UniswapV2DataProvider {
+  private gql: GraphQLProvider;
 
-  constructor(subgraphUrl: string) {
-    this.graphQLProvider = new GraphQLProvider(subgraphUrl);
+  // Constructor: Initializes the GraphQLProvider with the specified endpoint
+  constructor(endpoint: string) {
+    this.gql = new GraphQLProvider(endpoint);
   }
 
-  async getSwaps(account: string, skip: number = 0) {
+  // Method: Fetches swaps data for a specified Ethereum address
+  // Uses GraphQL variables for query parameter substitution, which helps prevent GraphQL injection attacks
+  async getSwaps(address: string, skip: number = 0) {
     const query = `
-      swaps(first: 1000, skip: ${skip}, where: { to: "${account}" }) {
-        id
-        timestamp
-        amount0In
-        amount1In
-        amount0Out
-        amount1Out
+      query getSwaps($address: String!, $skip: Int!) {
+        swaps(first: 1000, skip: $skip, where: { to: $address }) {
+          id
+          timestamp
+          amount0In
+          amount1In
+          amount0Out
+          amount1Out
+        }
       }
     `;
-    const data = await this.graphQLProvider.query(query);
+    const variables = { address, skip };
+    const data = await this.gql.query(query, variables);
     return data.swaps;
   }
 
-  async getLiquidityPositions(account: string, skip: number = 0) {
+  // Method: Fetches liquidity positions data for a specified Ethereum address
+  // Uses GraphQL variables for query parameter substitution, which helps prevent GraphQL injection attacks
+  async getLiquidityPositions(address: string, skip: number = 0) {
     const query = `
-      liquidityPositions(first: 1000, skip: ${skip}, where: { user: "${account}" }) {
-        id
-        liquidityTokenBalance
-        timestamp
+      query getLiquidityPositions($address: String!, $skip: Int!) {
+        liquidityPositions(first: 1000, skip: $skip, where: { user: $address }) {
+          id
+          liquidityTokenBalance
+          timestamp
+        }
       }
     `;
-    const data = await this.graphQLProvider.query(query);
+    const variables = { address, skip };
+    const data = await this.gql.query(query, variables);
     return data.liquidityPositions;
   }
 
