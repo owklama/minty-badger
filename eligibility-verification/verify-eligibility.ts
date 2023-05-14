@@ -77,20 +77,15 @@ export function function calculateBadges(userData) {
   return badges;
 }
 
-export async function fetchAndCalculateBadges(address) {
-  // Fetch the user's data
-  const userData = await getUserData(address);
-
-  // Calculate the user's badges
+const verifyEligibility = async (address: string) => {
+  // Fetch and process the data for a user's Ethereum address
+  fetchUserData("0x1234...")
+    .then((userData) => {
+      console.log("User Data:", userData);
+      const badges = calculateBadges(userData);
+      console.log("User Badges:", badges);
+    })
+    .catch((error) => console.error("Error fetching data:", error));
   const badges = calculateBadges(userData);
-
-  // Log the user's data for debugging
-  console.log("User Data:", userData);
-
-  // Return the user's badges
   return badges;
-}
-
-// Call the function with a test address for testing purposes
-// Comment out or remove in production
-console.log(fetchAndCalculateBadges("0xYourEthereumAddressHere"));
+};
