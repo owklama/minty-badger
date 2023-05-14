@@ -46,7 +46,7 @@ function calculateLiquidityBadge(liquidity) {
   return null;
 }
 
-function calculateBadges(userData) {
+export function function calculateBadges(userData) {
   const badges = [];
 
   // First Trade Badge
@@ -78,10 +78,18 @@ function calculateBadges(userData) {
 }
 
 // Fetch and process the data for a user's Ethereum address
-getUserData("0xYourEthereumAddressHere")
-  .then((userData) => {
-    console.log("User Data:", userData);
-    const badges = calculateBadges(userData);
-    console.log("User Badges:", badges);
-  })
-  .catch((error) => console.error("Error fetching data:", error));
+async function fetchAndCalculateBadges() {
+  // Fetch the user's data
+  const userData = await getUserData("0xYourEthereumAddressHere");
+
+  // Calculate the user's badges
+  const badges = calculateBadges(userData);
+
+  // Log the user's data
+  console.log("User Data:", userData);
+
+  // Log the user's badges
+  console.log("User Badges:", badges);
+}
+
+fetchAndCalculateBadges();
