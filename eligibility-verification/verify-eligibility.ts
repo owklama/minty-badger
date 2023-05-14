@@ -78,7 +78,7 @@ function calculateBadges(userData) {
 }
 
 // Fetch and process the data for a user's Ethereum address
-fetchUserData("0xYourEthereumAddressHere")
+getUserData("0xYourEthereumAddressHere")
   .then((userData) => {
     console.log("User Data:", userData);
     const badges = calculateBadges(userData);

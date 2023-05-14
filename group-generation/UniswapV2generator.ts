@@ -6,8 +6,8 @@ import {
   ValueType,
   Tags,
 } from "sismo-types";
-import { UniswapV2DataProvider } from "./data-collection/uniswapv2.ts";
-import { calculateBadges } from "./eligibility-verification/verify-eligibility.ts";
+import { UniswapV2DataProvider } from "../data-collection/UniswapV2DataProvider";
+import { calculateBadges } from "../eligibility-verification/verify-eligibility";
 
 // Badge criteria constants
 const VOLUME_TIERS = [1000, 10000, 100000, 1000000];
