@@ -1,25 +1,41 @@
-import fetch from "node-fetch";
+import GraphQLProvider from "./GraphQLProvider";
 
-export default class GraphQLProvider {
-  constructor(private endpoint: string) {}
+export default class UniswapV2DataProvider {
+  private gql: GraphQLProvider;
 
-  async query(query: string, variables: Record<string, any> = {}) {
-    const response = await fetch(this.endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, variables }),
-    });
+  constructor(endpoint: string) {
+    this.gql = new GraphQLProvider(endpoint);
+  }
 
-    if (!response.ok) {
-      throw new Error("Failed to execute GraphQL query");
-    }
+  async getUserData(address: string) {
+    const query = `
+      query GetUserData($address: String!) {
+        user(id: $address) {
+          id
+          liquidityPositions {
+            id
+            liquidityTokenBalance
+            pair {
+              token0 {
+                id
+                symbol
+                name
+              }
+              token1 {
+                id
+                symbol
+                name
+              }
+            }
+          }
+          usdSwapped
+        }
+      }
+    `;
 
-    const body = await response.json();
+    const variables = { address: address.toLowerCase() };
+    const data = await this.gql.query(query, variables);
 
-    if (body.errors) {
-      throw new Error("Errors were returned from the GraphQL endpoint");
-    }
-
-    return body.data;
+    return data.user;
   }
 }
